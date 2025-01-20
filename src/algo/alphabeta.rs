@@ -1,5 +1,5 @@
+use algo::state::{Score, State};
 use std::cmp;
-use algo::state::{State, Score};
 
 pub fn alphabeta<S: State>(mut state: &mut S) -> Vec<S::Move> {
     let possible_moves = state.generate_moves();
@@ -46,7 +46,7 @@ fn min<S: State>(mut state: &mut S, depth: usize, alpha: S::Score, mut beta: S::
             break;
         }
     }
-    
+
     worst_score
 }
 

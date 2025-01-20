@@ -1,7 +1,4 @@
-#[derive(Copy)]
-#[derive(Clone)]
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Color {
     Black,
     Blue,
@@ -36,8 +33,7 @@ impl Color {
     }
 }
 
-#[derive(Clone)]
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct AllExceptJokerIter {
     current: Option<Color>,
 }
@@ -47,21 +43,18 @@ impl Iterator for AllExceptJokerIter {
 
     fn next(&mut self) -> Option<Color> {
         let ret = self.current;
-        self.current = self.current.and_then(|c|
-                                        match c {
-                                            Color::Black => Some(Color::Blue),
-                                            Color::Blue  => Some(Color::Green),
-                                            Color::Green => Some(Color::Red),
-                                            Color::Red   => Some(Color::White),
-                                            Color::Joker | Color::White => None,
-                                        }
-        );
+        self.current = self.current.and_then(|c| match c {
+            Color::Black => Some(Color::Blue),
+            Color::Blue => Some(Color::Green),
+            Color::Green => Some(Color::Red),
+            Color::Red => Some(Color::White),
+            Color::Joker | Color::White => None,
+        });
         ret
     }
 }
 
-#[derive(Clone)]
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub struct AllIter {
     current: Option<Color>,
 }
@@ -71,16 +64,14 @@ impl Iterator for AllIter {
 
     fn next(&mut self) -> Option<Color> {
         let ret = self.current;
-        self.current = self.current.and_then(|c|
-                                        match c {
-                                            Color::Black => Some(Color::Blue),
-                                            Color::Blue  => Some(Color::Green),
-                                            Color::Green => Some(Color::Red),
-                                            Color::Red   => Some(Color::White),
-                                            Color::White => Some(Color::Joker),
-                                            Color::Joker => None,
-                                        }
-        );
+        self.current = self.current.and_then(|c| match c {
+            Color::Black => Some(Color::Blue),
+            Color::Blue => Some(Color::Green),
+            Color::Green => Some(Color::Red),
+            Color::Red => Some(Color::White),
+            Color::White => Some(Color::Joker),
+            Color::Joker => None,
+        });
         ret
     }
 }

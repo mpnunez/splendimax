@@ -1,16 +1,18 @@
-extern crate splendimax;
 extern crate rand;
+extern crate splendimax;
 
 use std::io;
 // use std::time::Duration;
 // use std::thread::sleep;
-use splendimax::algo::state::State as AlgoState;
-use splendimax::algo::state::Score;
-use splendimax::algo::alphabeta;
-use splendimax::state::State;
 use rand::{thread_rng, Rng};
+use splendimax::algo::alphabeta;
+use splendimax::algo::state::Score;
+use splendimax::algo::state::State as AlgoState;
+use splendimax::state::State;
 
-struct OppositeState<'a, S: AlgoState>(&'a mut S) where S: 'a;
+struct OppositeState<'a, S: AlgoState>(&'a mut S)
+where
+    S: 'a;
 
 impl<'a, S: AlgoState> AlgoState for OppositeState<'a, S> {
     type Score = S::Score;
@@ -47,7 +49,7 @@ fn main() {
         if state.is_terminal() {
             state.print(&mut stdout);
             println!("round: {}", round);
-            break
+            break;
         }
         let moves;
         if state.players_turn {

@@ -13,9 +13,7 @@ fn create_noble(black: u8, blue: u8, green: u8, red: u8, white: u8) -> Noble {
     }
 }
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Noble {
     pub cost: Tokens,
 }

@@ -1,12 +1,12 @@
+use algo;
 use card::Card;
 use color::Color;
 use cost::Tokens;
-use std::cmp::min;
-use noble::Noble;
-use algo;
-use rand::{thread_rng, Rng};
-use std::io;
 use iter::CopyingIterator;
+use noble::Noble;
+use rand::{thread_rng, Rng};
+use std::cmp::min;
+use std::io;
 
 pub const MINIMUM_TO_TAKE_2_TOKENS: u8 = 4;
 pub const NOBLE_SCORE: u8 = 3;
@@ -14,10 +14,7 @@ pub const MAXIMUM_RESERVED: usize = 3;
 pub const MAXIMUM_COINS: u8 = 10;
 pub const SCORE_TO_WIN: u8 = 15;
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Deck {
     One,
     Two,
@@ -26,20 +23,33 @@ pub enum Deck {
 
 type CardIndex = u8;
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Move {
-    Take { tokens: Tokens, drop: Tokens },
-    Reserve { index: CardIndex, deck: Deck, drop: Tokens, joker: bool },
-    Buy { index: CardIndex, deck: Deck, cost: Tokens, noble: Option<CardIndex> },
-    BuyReserved { index: CardIndex, cost: Tokens, noble: Option<CardIndex> },
+    Take {
+        tokens: Tokens,
+        drop: Tokens,
+    },
+    Reserve {
+        index: CardIndex,
+        deck: Deck,
+        drop: Tokens,
+        joker: bool,
+    },
+    Buy {
+        index: CardIndex,
+        deck: Deck,
+        cost: Tokens,
+        noble: Option<CardIndex>,
+    },
+    BuyReserved {
+        index: CardIndex,
+        cost: Tokens,
+        noble: Option<CardIndex>,
+    },
     Pass,
 }
 
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub struct State {
     pub deck1: Vec<Card>,
     pub cards1: Vec<Card>,
@@ -182,7 +192,11 @@ impl State {
             }
             for color in Color::all() {
                 try!(write!(out, "{}: {}", color.code(), player.tokens[color]));
-                let count = player.cards.iter().filter(|ref card| card.color == color).count();
+                let count = player
+                    .cards
+                    .iter()
+                    .filter(|ref card| card.color == color)
+                    .count();
                 if count > 0 {
                     try!(write!(out, " + {}", count));
                 }
@@ -266,7 +280,10 @@ impl algo::State for State {
     type Move = Move;
 
     fn score(&self) -> Score {
-        let card_multiplier = self.nobles.iter().fold(Tokens::empty(), |acc, noble| acc.max(&noble.cost));
+        let card_multiplier = self
+            .nobles
+            .iter()
+            .fold(Tokens::empty(), |acc, noble| acc.max(&noble.cost));
         let player_score = self.player.score();
         let adversary_score = self.adversary.score();
         let mut score = (player_score as Score - adversary_score as Score) * 3000;
@@ -303,11 +320,23 @@ impl algo::State for State {
 
         let mut tokens_from_cards = player.tokens_from_cards();
 
-        fn push_card_with_nobles<F>(tokens_from_cards: &mut Tokens, nobles: &Vec<Noble>, moves: &mut Vec<Move>, color: Color, f: F) where F: Fn(Option<u8>) -> Move {
+        fn push_card_with_nobles<F>(
+            tokens_from_cards: &mut Tokens,
+            nobles: &Vec<Noble>,
+            moves: &mut Vec<Move>,
+            color: Color,
+            f: F,
+        ) where
+            F: Fn(Option<u8>) -> Move,
+        {
             tokens_from_cards[color] += 1;
 
             {
-                let mut iter = nobles.iter().enumerate().filter(|&(_, ref noble)| tokens_from_cards.can_buy(&noble.cost)).map(|(i, _)| i as u8);
+                let mut iter = nobles
+                    .iter()
+                    .enumerate()
+                    .filter(|&(_, ref noble)| tokens_from_cards.can_buy(&noble.cost))
+                    .map(|(i, _)| i as u8);
 
                 // Always push at least one
                 moves.push(f(iter.next()));
@@ -322,52 +351,68 @@ impl algo::State for State {
         // Do most benificial moves first to get benefits of α β pruning
         for (i, card) in self.cards3.iter().enumerate() {
             if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(&mut tokens_from_cards, &self.nobles, &mut moves, card.color, |noble: Option<u8>| {
-                    Move::Buy {
+                push_card_with_nobles(
+                    &mut tokens_from_cards,
+                    &self.nobles,
+                    &mut moves,
+                    card.color,
+                    |noble: Option<u8>| Move::Buy {
                         index: i as u8,
                         deck: Deck::Three,
                         cost: cost,
                         noble: noble,
-                    }
-                });
+                    },
+                );
             }
         }
 
         for (i, card) in self.cards2.iter().enumerate() {
             if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(&mut tokens_from_cards, &self.nobles, &mut moves, card.color, |noble: Option<u8>| {
-                    Move::Buy {
+                push_card_with_nobles(
+                    &mut tokens_from_cards,
+                    &self.nobles,
+                    &mut moves,
+                    card.color,
+                    |noble: Option<u8>| Move::Buy {
                         index: i as u8,
                         deck: Deck::Two,
                         cost: cost,
                         noble: noble,
-                    }
-                });
+                    },
+                );
             }
         }
 
         for (i, card) in self.cards1.iter().enumerate() {
             if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(&mut tokens_from_cards, &self.nobles, &mut moves, card.color, |noble: Option<u8>| {
-                    Move::Buy {
+                push_card_with_nobles(
+                    &mut tokens_from_cards,
+                    &self.nobles,
+                    &mut moves,
+                    card.color,
+                    |noble: Option<u8>| Move::Buy {
                         index: i as u8,
                         deck: Deck::One,
                         cost: cost,
                         noble: noble,
-                    }
-                });
+                    },
+                );
             }
         }
 
         for (i, card) in player.reserved.iter().enumerate() {
             if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(&mut tokens_from_cards, &self.nobles, &mut moves, card.color, |noble: Option<u8>| {
-                    Move::BuyReserved {
+                push_card_with_nobles(
+                    &mut tokens_from_cards,
+                    &self.nobles,
+                    &mut moves,
+                    card.color,
+                    |noble: Option<u8>| Move::BuyReserved {
                         index: i as u8,
                         cost: cost,
                         noble: noble,
-                    }
-                });
+                    },
+                );
             }
         }
 
@@ -377,7 +422,7 @@ impl algo::State for State {
 
         for (color1, iter2) in Color::all_except_joker().copying() {
             if self.bank[color1] < 1 {
-                continue
+                continue;
             }
 
             let mut any = false;
@@ -388,23 +433,25 @@ impl algo::State for State {
                 let discard = (total + 2).saturating_sub(MAXIMUM_COINS);
                 for drop in discard_options[discard as usize].iter() {
                     if drop[color1] > 0 {
-                        continue
+                        continue;
                     }
                     any = true;
-                    moves.push(Move::Take { tokens: tokens, drop: *drop });
+                    moves.push(Move::Take {
+                        tokens: tokens,
+                        drop: *drop,
+                    });
                 }
             }
 
             for (color2, iter3) in iter2.copying() {
                 if self.bank[color2] < 1 {
-                    continue
+                    continue;
                 }
-
 
                 let mut any2 = false;
                 for color3 in iter3 {
                     if self.bank[color3] < 1 {
-                        continue
+                        continue;
                     }
 
                     let mut tokens = Tokens::empty();
@@ -416,10 +463,13 @@ impl algo::State for State {
                     for drop in discard_options[discard as usize].iter() {
                         // Ignore useless scenarios
                         if drop[color1] > 0 || drop[color2] > 0 || drop[color3] > 0 {
-                            continue
+                            continue;
                         }
                         any2 = true;
-                        moves.push(Move::Take { tokens: tokens, drop: *drop });
+                        moves.push(Move::Take {
+                            tokens: tokens,
+                            drop: *drop,
+                        });
                     }
                 }
 
@@ -431,10 +481,13 @@ impl algo::State for State {
                     let discard = (total + 2).saturating_sub(MAXIMUM_COINS);
                     for drop in discard_options[discard as usize].iter() {
                         if drop[color1] > 0 || drop[color2] > 0 {
-                            continue
+                            continue;
                         }
                         any = true;
-                        moves.push(Move::Take { tokens: tokens, drop: *drop });
+                        moves.push(Move::Take {
+                            tokens: tokens,
+                            drop: *drop,
+                        });
                     }
                 }
 
@@ -446,9 +499,12 @@ impl algo::State for State {
                 let discard = (total + 1).saturating_sub(MAXIMUM_COINS);
                 for drop in discard_options[discard as usize].iter() {
                     if drop[color1] > 0 {
-                        continue
+                        continue;
                     }
-                    moves.push(Move::Take { tokens: tokens, drop: *drop });
+                    moves.push(Move::Take {
+                        tokens: tokens,
+                        drop: *drop,
+                    });
                 }
             }
         }
@@ -467,7 +523,7 @@ impl algo::State for State {
             for i in 0..self.cards1.len() {
                 for drop in drop_possibilities.iter() {
                     moves.push(Move::Reserve {
-                        index: i as u8, 
+                        index: i as u8,
                         deck: Deck::One,
                         joker: joker,
                         drop: *drop,
@@ -477,8 +533,8 @@ impl algo::State for State {
 
             for i in 0..self.cards2.len() {
                 for drop in drop_possibilities.iter() {
-                    moves.push(Move::Reserve { 
-                        index: i as u8, 
+                    moves.push(Move::Reserve {
+                        index: i as u8,
                         deck: Deck::Two,
                         joker: joker,
                         drop: *drop,
@@ -488,7 +544,7 @@ impl algo::State for State {
 
             for i in 0..self.cards3.len() {
                 for drop in drop_possibilities.iter() {
-                    moves.push(Move::Reserve { 
+                    moves.push(Move::Reserve {
                         index: i as u8,
                         deck: Deck::Three,
                         joker: joker,
@@ -517,8 +573,13 @@ impl algo::State for State {
                 player.tokens -= drop;
                 self.bank += drop;
                 self.bank -= tokens;
-            },
-            Move::Reserve { index, deck, joker, drop } => {
+            }
+            Move::Reserve {
+                index,
+                deck,
+                joker,
+                drop,
+            } => {
                 let cards = match deck {
                     Deck::One => &mut self.cards1,
                     Deck::Two => &mut self.cards2,
@@ -531,7 +592,7 @@ impl algo::State for State {
                     &mut self.adversary
                 };
 
-                let card = cards.remove(index as usize);                
+                let card = cards.remove(index as usize);
                 player.reserved.push(card);
 
                 if joker {
@@ -539,14 +600,19 @@ impl algo::State for State {
                     self.bank.joker -= 1;
                 }
                 player.tokens -= drop;
-            },
-            Move::Buy { index, deck, cost, noble } => {
+            }
+            Move::Buy {
+                index,
+                deck,
+                cost,
+                noble,
+            } => {
                 let cards = match deck {
                     Deck::One => &mut self.cards1,
                     Deck::Two => &mut self.cards2,
                     Deck::Three => &mut self.cards3,
                 };
-                
+
                 let player = if self.players_turn {
                     &mut self.player
                 } else {
@@ -562,10 +628,10 @@ impl algo::State for State {
                     Some(noble_index) => {
                         let noble = self.nobles.remove(noble_index as usize);
                         player.nobles.push(noble);
-                    },
-                    None => {},
+                    }
+                    None => {}
                 }
-            },
+            }
             Move::BuyReserved { index, cost, noble } => {
                 let player = if self.players_turn {
                     &mut self.player
@@ -581,11 +647,11 @@ impl algo::State for State {
                     Some(noble_index) => {
                         let noble = self.nobles.remove(noble_index as usize);
                         player.nobles.push(noble);
-                    },
-                    None => {},
+                    }
+                    None => {}
                 }
-            },
-            Move::Pass => {},
+            }
+            Move::Pass => {}
         }
         self.players_turn = !self.players_turn;
     }
@@ -603,8 +669,13 @@ impl algo::State for State {
                 self.bank -= drop;
                 player.tokens += drop;
                 player.tokens -= tokens;
-            },
-            Move::Reserve { index, deck, joker, drop } => {
+            }
+            Move::Reserve {
+                index,
+                deck,
+                joker,
+                drop,
+            } => {
                 let player = if self.players_turn {
                     &mut self.player
                 } else {
@@ -624,8 +695,13 @@ impl algo::State for State {
 
                 let card = player.reserved.pop().unwrap();
                 cards.insert(index as usize, card);
-            },
-            Move::Buy { index, deck, cost, noble } => {
+            }
+            Move::Buy {
+                index,
+                deck,
+                cost,
+                noble,
+            } => {
                 let player = if self.players_turn {
                     &mut self.player
                 } else {
@@ -647,10 +723,10 @@ impl algo::State for State {
                     Some(noble_index) => {
                         let noble = player.nobles.pop().unwrap();
                         self.nobles.insert(noble_index as usize, noble);
-                    },
-                    None => {},
+                    }
+                    None => {}
                 }
-            },
+            }
             Move::BuyReserved { index, cost, noble } => {
                 let player = if self.players_turn {
                     &mut self.player
@@ -666,13 +742,13 @@ impl algo::State for State {
 
                 match noble {
                     Some(noble_index) => {
-                        let noble = player.nobles.pop().unwrap();;
+                        let noble = player.nobles.pop().unwrap();
                         self.nobles.insert(noble_index as usize, noble);
-                    },
-                    None => {},
+                    }
+                    None => {}
                 }
-            },
-            Move::Pass => {},
+            }
+            Move::Pass => {}
         }
     }
 
@@ -681,8 +757,7 @@ impl algo::State for State {
     }
 }
 
-#[derive(PartialEq)]
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub struct Player {
     pub tokens: Tokens,
     pub cards: Vec<Card>,
@@ -737,8 +812,7 @@ impl Player {
     }
 
     pub fn score(&self) -> u8 {
-        self.cards.iter().fold(0, |acc, ref card| acc + card.points) +
-            self.nobles.len() as u8 * 3
+        self.cards.iter().fold(0, |acc, ref card| acc + card.points) + self.nobles.len() as u8 * 3
     }
 
     pub fn can_buy(&self, card: &Card) -> bool {
@@ -792,13 +866,11 @@ mod tests {
                 white: 0,
                 joker: 0,
             },
-            cards: vec![
-                Card {
-                    color: Color::Blue,
-                    cost: Tokens::empty(),
-                    points: 0,
-                }
-            ],
+            cards: vec![Card {
+                color: Color::Blue,
+                cost: Tokens::empty(),
+                points: 0,
+            }],
             reserved: Vec::new(),
             nobles: Vec::new(),
         };
@@ -851,91 +923,109 @@ mod tests {
                 white: 0,
                 joker: 1,
             },
-            cards: vec![
-                Card {
-                    color: Color::Blue,
-                    cost: Tokens::empty(),
-                    points: 0,
-                }
-            ],
+            cards: vec![Card {
+                color: Color::Blue,
+                cost: Tokens::empty(),
+                points: 0,
+            }],
             reserved: Vec::new(),
             nobles: Vec::new(),
         };
-        assert_eq!(player.cost_for(&Card {
-            color: Color::Black,
-            cost: Tokens {
+        assert_eq!(
+            player
+                .cost_for(&Card {
+                    color: Color::Black,
+                    cost: Tokens {
+                        black: 0,
+                        blue: 0,
+                        green: 1,
+                        red: 0,
+                        white: 0,
+                        joker: 0,
+                    },
+                    points: 0,
+                })
+                .unwrap(),
+            Tokens {
                 black: 0,
                 blue: 0,
                 green: 1,
                 red: 0,
                 white: 0,
                 joker: 0,
-            },
-            points: 0,
-        }).unwrap(), Tokens {
-            black: 0,
-            blue: 0,
-            green: 1,
-            red: 0,
-            white: 0,
-            joker: 0,
-        });
-        assert_eq!(player.cost_for(&Card {
-            color: Color::Black,
-            cost: Tokens {
+            }
+        );
+        assert_eq!(
+            player
+                .cost_for(&Card {
+                    color: Color::Black,
+                    cost: Tokens {
+                        black: 0,
+                        blue: 1,
+                        green: 1,
+                        red: 0,
+                        white: 0,
+                        joker: 0,
+                    },
+                    points: 0,
+                })
+                .unwrap(),
+            Tokens {
                 black: 0,
-                blue: 1,
+                blue: 0,
                 green: 1,
                 red: 0,
                 white: 0,
                 joker: 0,
-            },
-            points: 0,
-        }).unwrap(), Tokens {
-            black: 0,
-            blue: 0,
-            green: 1,
-            red: 0,
-            white: 0,
-            joker: 0,
-        });
-        assert_eq!(player.cost_for(&Card {
-            color: Color::Black,
-            cost: Tokens {
+            }
+        );
+        assert_eq!(
+            player
+                .cost_for(&Card {
+                    color: Color::Black,
+                    cost: Tokens {
+                        black: 0,
+                        blue: 2,
+                        green: 1,
+                        red: 0,
+                        white: 0,
+                        joker: 0,
+                    },
+                    points: 0,
+                })
+                .unwrap(),
+            Tokens {
                 black: 0,
-                blue: 2,
+                blue: 0,
                 green: 1,
                 red: 0,
                 white: 0,
-                joker: 0,
-            },
-            points: 0,
-        }).unwrap(), Tokens {
-            black: 0,
-            blue: 0,
-            green: 1,
-            red: 0,
-            white: 0,
-            joker: 1,
-        });
-        assert_eq!(player.cost_for(&Card {
-            color: Color::Black,
-            cost: Tokens {
+                joker: 1,
+            }
+        );
+        assert_eq!(
+            player
+                .cost_for(&Card {
+                    color: Color::Black,
+                    cost: Tokens {
+                        black: 0,
+                        blue: 1,
+                        green: 1,
+                        red: 1,
+                        white: 0,
+                        joker: 0,
+                    },
+                    points: 0,
+                })
+                .unwrap(),
+            Tokens {
                 black: 0,
-                blue: 1,
+                blue: 0,
                 green: 1,
-                red: 1,
+                red: 0,
                 white: 0,
-                joker: 0,
-            },
-            points: 0,
-        }).unwrap(), Tokens {
-            black: 0,
-            blue: 0,
-            green: 1,
-            red: 0,
-            white: 0,
-            joker: 1,
-        });
+                joker: 1,
+            }
+        );
     }
 }

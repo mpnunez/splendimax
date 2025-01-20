@@ -1,5 +1,5 @@
+use algo::state::{Score, State};
 use std::cmp;
-use algo::state::{State, Score};
 
 pub fn minimax<S: State>(mut state: &mut S) -> Vec<S::Move> {
     let possible_moves = state.generate_moves();
@@ -41,7 +41,7 @@ fn min<S: State>(mut state: &mut S, depth: usize) -> S::Score {
 
         worst_score = cmp::min(worst_score, score);
     }
-    
+
     worst_score
 }
 

@@ -1,7 +1,15 @@
-use cost::Tokens;
 use color::Color;
+use cost::Tokens;
 
-fn create_card(color: Color, points: u8, black: u8, blue: u8, green: u8, red: u8, white: u8) -> Card {
+fn create_card(
+    color: Color,
+    points: u8,
+    black: u8,
+    blue: u8,
+    green: u8,
+    red: u8,
+    white: u8,
+) -> Card {
     Card {
         color: color,
         cost: Tokens {
@@ -16,9 +24,7 @@ fn create_card(color: Color, points: u8, black: u8, blue: u8, green: u8, red: u8
     }
 }
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Card {
     pub color: Color,
     pub cost: Tokens,
@@ -131,4 +137,3 @@ impl Card {
         ]
     }
 }
-

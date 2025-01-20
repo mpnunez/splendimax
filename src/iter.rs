@@ -1,8 +1,14 @@
-pub struct CopyingIter<I> where I: Iterator + Clone {
+pub struct CopyingIter<I>
+where
+    I: Iterator + Clone,
+{
     iter: I,
 }
 
-impl<I> Iterator for CopyingIter<I> where I: Iterator + Clone {
+impl<I> Iterator for CopyingIter<I>
+where
+    I: Iterator + Clone,
+{
     type Item = (I::Item, I);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -11,10 +17,11 @@ impl<I> Iterator for CopyingIter<I> where I: Iterator + Clone {
 }
 
 pub trait CopyingIterator: Iterator {
-    fn copying(self) -> CopyingIter<Self> where Self: Clone {
-        CopyingIter {
-            iter: self,
-        }
+    fn copying(self) -> CopyingIter<Self>
+    where
+        Self: Clone,
+    {
+        CopyingIter { iter: self }
     }
 }
 

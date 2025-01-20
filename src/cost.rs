@@ -1,12 +1,9 @@
-use std::ops::{Index, IndexMut, Add, AddAssign, Sub, SubAssign};
 use color::Color;
-use std::cmp::{min, max};
 use iter::CopyingIterator;
+use std::cmp::{max, min};
+use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(Copy)]
-#[derive(PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tokens {
     pub black: u8,
     pub blue: u8,
@@ -82,7 +79,12 @@ impl Tokens {
     // TODO(bouk): optimize if we don't need to know all permutations
     // TODO(bouk): convert to a bunch of iterators so we 're not allocating all this shit
     pub fn discard_permutations(&self) -> [Vec<Tokens>; 4] {
-        let mut result = [vec![Tokens::empty()], Vec::with_capacity(5), Vec::with_capacity(15), Vec::with_capacity(20)];
+        let mut result = [
+            vec![Tokens::empty()],
+            Vec::with_capacity(5),
+            Vec::with_capacity(15),
+            Vec::with_capacity(20),
+        ];
         for (color1, iter2) in Color::all_except_joker().copying() {
             for count1 in 1..min(self[color1], 3) + 1 {
                 for (color2, iter3) in iter2.copying() {
@@ -117,9 +119,9 @@ impl Index<Color> for Tokens {
     fn index<'a>(&'a self, color: Color) -> &'a u8 {
         match color {
             Color::Black => &self.black,
-            Color::Blue  => &self.blue,
+            Color::Blue => &self.blue,
             Color::Green => &self.green,
-            Color::Red   => &self.red,
+            Color::Red => &self.red,
             Color::White => &self.white,
             Color::Joker => &self.joker,
         }
@@ -130,9 +132,9 @@ impl IndexMut<Color> for Tokens {
     fn index_mut<'a>(&'a mut self, color: Color) -> &'a mut u8 {
         match color {
             Color::Black => &mut self.black,
-            Color::Blue  => &mut self.blue,
+            Color::Blue => &mut self.blue,
             Color::Green => &mut self.green,
-            Color::Red   => &mut self.red,
+            Color::Red => &mut self.red,
             Color::White => &mut self.white,
             Color::Joker => &mut self.joker,
         }
@@ -142,9 +144,9 @@ impl IndexMut<Color> for Tokens {
 impl AddAssign for Tokens {
     fn add_assign(&mut self, other: Tokens) {
         self.black += other.black;
-        self.blue  += other.blue;
+        self.blue += other.blue;
         self.green += other.green;
-        self.red   += other.red;
+        self.red += other.red;
         self.white += other.white;
         self.joker += other.joker;
     }
@@ -153,9 +155,9 @@ impl AddAssign for Tokens {
 impl SubAssign for Tokens {
     fn sub_assign(&mut self, other: Tokens) {
         self.black -= other.black;
-        self.blue  -= other.blue;
+        self.blue -= other.blue;
         self.green -= other.green;
-        self.red   -= other.red;
+        self.red -= other.red;
         self.white -= other.white;
         self.joker -= other.joker;
     }
@@ -167,9 +169,9 @@ impl Add for Tokens {
     fn add(self, other: Tokens) -> Tokens {
         Tokens {
             black: self.black + other.black,
-            blue:  self.blue  + other.blue,
+            blue: self.blue + other.blue,
             green: self.green + other.green,
-            red:   self.red   + other.red,
+            red: self.red + other.red,
             white: self.white + other.white,
             joker: self.joker + other.joker,
         }
@@ -182,9 +184,9 @@ impl Sub for Tokens {
     fn sub(self, other: Tokens) -> Tokens {
         Tokens {
             black: self.black - other.black,
-            blue:  self.blue  - other.blue,
+            blue: self.blue - other.blue,
             green: self.green - other.green,
-            red:   self.red   - other.red,
+            red: self.red - other.red,
             white: self.white - other.white,
             joker: self.joker - other.joker,
         }
@@ -304,28 +306,28 @@ mod tests {
             joker: 1,
         };
 
-        assert_eq!(tokens.discard_permutations(), [vec![
-            Tokens::empty(),
-        ], vec![
-            Tokens::one(Color::Green),
-        ], vec![
-            Tokens {
-                black: 0,
-                blue: 0,
-                green: 2,
-                red: 0,
-                white: 0,
-                joker: 0,
-            },
-        ], vec![
-            Tokens {
-                black: 0,
-                blue: 0,
-                green: 3,
-                red: 0,
-                white: 0,
-                joker: 0,
-            },
-        ]]);
+        assert_eq!(
+            tokens.discard_permutations(),
+            [
+                vec![Tokens::empty(),],
+                vec![Tokens::one(Color::Green),],
+                vec![Tokens {
+                    black: 0,
+                    blue: 0,
+                    green: 2,
+                    red: 0,
+                    white: 0,
+                    joker: 0,
+                },],
+                vec![Tokens {
+                    black: 0,
+                    blue: 0,
+                    green: 3,
+                    red: 0,
+                    white: 0,
+                    joker: 0,
+                },]
+            ]
+        );
     }
 }
