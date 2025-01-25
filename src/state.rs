@@ -852,7 +852,6 @@ mod tests {
         let state = super::State::new(2);
         let moves = state.generate_moves();
         println!("{:?}", moves);
-        assert!(false);
     }
 
     #[test]
