@@ -30,14 +30,33 @@ impl Tokens {
             panic!("only 2 players")
         }
 
-        Tokens {
-            black: 4,
-            blue: 4,
-            green: 4,
-            red: 4,
-            white: 4,
-            joker: 5,
+        match players {
+            2 => Tokens {
+                black: 4,
+                blue: 4,
+                green: 4,
+                red: 4,
+                white: 4,
+                joker: 5,
+            },
+            3 => Tokens {
+                black: 5,
+                blue: 5,
+                green: 5,
+                red: 5,
+                white: 5,
+                joker: 5,
+            },
+            _ => Tokens {
+                black: 7,
+                blue: 7,
+                green: 7,
+                red: 7,
+                white: 7,
+                joker: 5,
+            },
         }
+        
     }
 
     pub fn max(&self, other: &Tokens) -> Tokens {
