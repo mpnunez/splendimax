@@ -59,6 +59,13 @@ impl CardRecord {
 }
 
 fn main() {
+
+    // 3 empty decks to be populated
+    let mut decks: Vec<Vec<Card>> = Vec::new();
+    for i in 1..4 {
+        decks.push(Vec::<Card>::new());
+    }
+
     // Build the CSV reader and iterate over each record.
     let mut rdr = csv::Reader::from_path("cards.csv").expect("cards.csv not read");
     for result in rdr.deserialize() {
@@ -69,6 +76,8 @@ fn main() {
         }
         let record: CardRecord = result.unwrap();
         let card = record.create_card();
+        let ind = record.level - 1;
+        decks[usize::from(ind)].push(card.clone());
         println!("{:?}", card);
     }
 }
