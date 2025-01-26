@@ -2,7 +2,7 @@ use std::{error::Error, io, process};
 
 fn example() -> Result<(), Box<dyn Error>> {
     // Build the CSV reader and iterate over each record.
-    let mut rdr = csv::Reader::from_reader(io::stdin());
+    let mut rdr = csv::Reader::from_path("cards.csv")?;
     for result in rdr.records() {
         // The iterator yields Result<StringRecord, Error>, so we check the
         // error here.

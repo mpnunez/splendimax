@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Bouke van der Bijl <boukevanderbijl@gmail.com>"]
 
 [dependencies]
+csv = "1.3.1"
 rand = "0.3"
