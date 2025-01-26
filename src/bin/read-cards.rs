@@ -58,22 +58,17 @@ impl CardRecord {
     }
 }
 
-fn example() -> Result<(), Box<dyn Error>> {
+fn main() {
     // Build the CSV reader and iterate over each record.
-    let mut rdr = csv::Reader::from_path("cards.csv")?;
+    let mut rdr = csv::Reader::from_path("cards.csv").expect("cards.csv not read");
     for result in rdr.deserialize() {
         // The iterator yields Result<StringRecord, Error>, so we check the
         // error here.
-        let record: CardRecord = result?;
+        if result.is_err() {
+            continue;
+        }
+        let record: CardRecord = result.unwrap();
         let card = record.create_card();
         println!("{:?}", card);
-    }
-    Ok(())
-}
-
-fn main() {
-    if let Err(err) = example() {
-        println!("error running example: {}", err);
-        process::exit(1);
     }
 }
