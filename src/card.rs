@@ -137,3 +137,16 @@ impl Card {
         ]
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_decks () {
+        let deck1 = Card::deck1();
+        let deck1 = Card::deck2();
+        let deck1 = Card::deck3();
+    }
+
+}
