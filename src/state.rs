@@ -226,6 +226,10 @@ impl State {
             }
             try!(write!(out, "\n"));
             for noble in self.nobles.iter() {
+                write!(out, "┃  {}  ┃ ", noble.points)?;
+            }
+            write!(out, "\n")?;
+            for noble in self.nobles.iter() {
                 try!(write!(out, "┃"));
                 let mut count = 0;
                 for color in Color::all_except_joker() {
