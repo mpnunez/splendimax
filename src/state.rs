@@ -2,6 +2,7 @@ use algo;
 use card::Card;
 use color::Color;
 use cost::Tokens;
+use readcards::read_cards;
 use iter::CopyingIterator;
 use noble::Noble;
 use rand::{thread_rng, Rng};
@@ -79,17 +80,19 @@ impl State {
         }
         let mut rng = thread_rng();
 
-        let mut deck1 = Card::deck1();
+        let decks = read_cards("cards.csv");
+
+        let mut deck1 = decks[0].clone();
         rng.shuffle(&mut deck1);
         let new_deck1_len = deck1.len() - 4;
         let cards1 = deck1.drain(new_deck1_len..).collect();
 
-        let mut deck2 = Card::deck2();
+        let mut deck2 = decks[1].clone();
         rng.shuffle(&mut deck2);
         let new_deck2_len = deck2.len() - 4;
         let cards2 = deck2.drain(new_deck2_len..).collect();
 
-        let mut deck3 = Card::deck3();
+        let mut deck3 = decks[2].clone();
         rng.shuffle(&mut deck3);
         let new_deck3_len = deck3.len() - 4;
         let cards3 = deck3.drain(new_deck3_len..).collect();

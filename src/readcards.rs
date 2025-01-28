@@ -1,9 +1,8 @@
 use std::{error::Error, io, process};
 
-extern crate splendimax;
-use splendimax::color::Color;
-use splendimax::cost::Tokens;
-use splendimax::card::Card;
+use color::Color;
+use cost::Tokens;
+use card::Card;
 
 
 
@@ -58,7 +57,7 @@ impl CardRecord {
     }
 }
 
-fn main() {
+pub fn read_cards(fname: &str) -> Vec<Vec<Card>> {
 
     // 3 empty decks to be populated
     let mut decks: Vec<Vec<Card>> = Vec::new();
@@ -67,7 +66,7 @@ fn main() {
     }
 
     // Build the CSV reader and iterate over each record.
-    let mut rdr = csv::Reader::from_path("cards.csv").expect("cards.csv not read");
+    let mut rdr = csv::Reader::from_path(fname).expect("cards.csv not read");
     for result in rdr.deserialize() {
         // The iterator yields Result<StringRecord, Error>, so we check the
         // error here.
@@ -80,4 +79,23 @@ fn main() {
         decks[usize::from(ind)].push(card.clone());
         println!("{:?}", card);
     }
+
+    decks
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn create_decks () {
+        let decks = read_cards("cards.csv");
+        let deck1 = decks[0].clone();
+        assert_eq!(deck1.len(),40);
+        let deck1 = decks[1].clone();
+        assert_eq!(deck1.len(),30);
+        let deck1 = decks[2].clone();
+        assert_eq!(deck1.len(),20);
+    }
+
 }
