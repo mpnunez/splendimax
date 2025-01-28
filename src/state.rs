@@ -815,7 +815,8 @@ impl Player {
     }
 
     pub fn score(&self) -> u8 {
-        self.cards.iter().fold(0, |acc, ref card| acc + card.points) + self.nobles.len() as u8 * 3
+        self.cards.iter().fold(0, |acc, ref card| acc + card.points)
+            + self.nobles.iter().fold(0, |acc, ref nob| acc + nob.points)
     }
 
     pub fn can_buy(&self, card: &Card) -> bool {

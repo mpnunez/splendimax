@@ -2,6 +2,7 @@ use cost::Tokens;
 
 fn create_noble(black: u8, blue: u8, green: u8, red: u8, white: u8) -> Noble {
     Noble {
+        points: 3,
         cost: Tokens {
             black: black,
             blue: blue,
@@ -15,7 +16,7 @@ fn create_noble(black: u8, blue: u8, green: u8, red: u8, white: u8) -> Noble {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Noble {
-    //pub points: u8,
+    pub points: u8,
     pub cost: Tokens,
 }
 
