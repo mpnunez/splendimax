@@ -89,3 +89,12 @@ Level,Color,PV,Black,Blue,Green,Red,White
 3,Red,4,0,0,7,0,0
 3,Red,4,0,3,6,3,0
 3,Red,5,0,0,7,3,0
+0,Noble,3,0,0,4,4,0
+0,Noble,3,3,0,0,3,3
+0,Noble,3,4,0,0,0,4
+0,Noble,3,0,4,4,0,0
+0,Noble,3,0,3,3,3,0
+0,Noble,3,0,3,3,0,3
+0,Noble,3,4,0,0,4,0
+0,Noble,3,3,3,0,0,3
+0,Noble,3,3,0,3,3,0

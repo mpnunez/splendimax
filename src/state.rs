@@ -2,15 +2,13 @@ use algo;
 use card::Card;
 use color::Color;
 use cost::Tokens;
-use readcards::read_cards;
+use readcards::read_cards_of_level;
 use iter::CopyingIterator;
-use noble::Noble;
 use rand::{thread_rng, Rng};
 use std::cmp::min;
 use std::io;
 
 pub const MINIMUM_TO_TAKE_2_TOKENS: u8 = 4;
-pub const NOBLE_SCORE: u8 = 3;
 pub const MAXIMUM_RESERVED: usize = 3;
 pub const MAXIMUM_COINS: u8 = 10;
 pub const SCORE_TO_WIN: u8 = 15;
@@ -65,7 +63,7 @@ pub struct State {
     pub player: Player,
     pub adversary: Player,
 
-    pub nobles: Vec<Noble>,
+    pub nobles: Vec<Card>,
 
     // true if player's turn, false if adversary's turn
     pub players_turn: bool,
@@ -80,24 +78,22 @@ impl State {
         }
         let mut rng = thread_rng();
 
-        let decks = read_cards("cards.csv");
-
-        let mut deck1 = decks[0].clone();
+        let mut deck1 = read_cards_of_level("cards.csv",1);
         rng.shuffle(&mut deck1);
         let new_deck1_len = deck1.len() - 4;
         let cards1 = deck1.drain(new_deck1_len..).collect();
 
-        let mut deck2 = decks[1].clone();
+        let mut deck2 = read_cards_of_level("cards.csv",2);
         rng.shuffle(&mut deck2);
         let new_deck2_len = deck2.len() - 4;
         let cards2 = deck2.drain(new_deck2_len..).collect();
 
-        let mut deck3 = decks[2].clone();
+        let mut deck3 = read_cards_of_level("cards.csv",3);
         rng.shuffle(&mut deck3);
         let new_deck3_len = deck3.len() - 4;
         let cards3 = deck3.drain(new_deck3_len..).collect();
 
-        let mut nobles = Noble::all();
+        let mut nobles = read_cards_of_level("cards.csv",0);
         rng.shuffle(&mut nobles);
         nobles.truncate(3);
 
@@ -325,7 +321,7 @@ impl algo::State for State {
 
         fn push_card_with_nobles<F>(
             tokens_from_cards: &mut Tokens,
-            nobles: &Vec<Noble>,
+            nobles: &Vec<Card>,
             moves: &mut Vec<Move>,
             color: Color,
             f: F,
@@ -765,7 +761,7 @@ pub struct Player {
     pub tokens: Tokens,
     pub cards: Vec<Card>,
     pub reserved: Vec<Card>,
-    pub nobles: Vec<Noble>,
+    pub nobles: Vec<Card>,
 }
 
 impl Player {

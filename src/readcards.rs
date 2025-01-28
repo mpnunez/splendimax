@@ -37,7 +37,7 @@ impl CardRecord {
             "Green" => Color::Green,
             "Red" => Color::Red,
             "White" => Color::White,
-            _ => panic!("Unknown color {}", self.color),
+            _ => Color::Joker,
         }
     }
 
@@ -57,13 +57,10 @@ impl CardRecord {
     }
 }
 
-pub fn read_cards(fname: &str) -> Vec<Vec<Card>> {
+pub fn read_cards_of_level(fname: &str, level: u8) -> Vec<Card> {
 
     // 3 empty decks to be populated
-    let mut decks: Vec<Vec<Card>> = Vec::new();
-    for i in 1..4 {
-        decks.push(Vec::<Card>::new());
-    }
+    let mut deck: Vec<Card> = Vec::new();
 
     // Build the CSV reader and iterate over each record.
     let mut rdr = csv::Reader::from_path(fname).expect("cards.csv not read");
@@ -74,13 +71,14 @@ pub fn read_cards(fname: &str) -> Vec<Vec<Card>> {
             continue;
         }
         let record: CardRecord = result.unwrap();
+        if record.level != level {
+            continue;
+        }
         let card = record.create_card();
-        let ind = record.level - 1;
-        decks[usize::from(ind)].push(card.clone());
-        println!("{:?}", card);
+        deck.push(card.clone());
     }
 
-    decks
+    deck
 }
 
 #[cfg(test)]
@@ -89,13 +87,14 @@ mod tests {
 
     #[test]
     fn create_decks () {
-        let decks = read_cards("cards.csv");
-        let deck1 = decks[0].clone();
+        let deck1 = read_cards_of_level("cards.csv",1);
         assert_eq!(deck1.len(),40);
-        let deck1 = decks[1].clone();
-        assert_eq!(deck1.len(),30);
-        let deck1 = decks[2].clone();
-        assert_eq!(deck1.len(),20);
+        let deck2 = read_cards_of_level("cards.csv",2);
+        assert_eq!(deck2.len(),30);
+        let deck3 = read_cards_of_level("cards.csv",3);
+        assert_eq!(deck3.len(),20);
+        let nobles = read_cards_of_level("cards.csv",0);
+        assert_eq!(nobles.len(),9);
     }
 
 }
