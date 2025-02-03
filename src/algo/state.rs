@@ -27,6 +27,6 @@ pub trait State {
     fn score(&self) -> Self::Score;
     fn generate_moves(&self) -> Vec<Self::Move>;
     fn is_terminal(&self) -> bool;
-    fn apply(&mut self, &Self::Move);
-    fn undo(&mut self, &Self::Move);
+    fn apply(&mut self, _: &Self::Move);
+    fn undo(&mut self, _: &Self::Move);
 }

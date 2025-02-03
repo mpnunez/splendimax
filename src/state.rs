@@ -113,9 +113,9 @@ impl State {
         }
     }
 
-    pub fn print(&self, out: &mut io::Write) -> io::Result<()> {
+    pub fn print(&self, out: &mut dyn io::Write) -> io::Result<()> {
         try!(write!(out, "Player: {}\n", self.adversary.score()));
-        fn print_cards(out: &mut io::Write, cards: &Vec<Card>) -> io::Result<()> {
+        fn print_cards(out: &mut dyn io::Write, cards: &Vec<Card>) -> io::Result<()> {
             if !cards.is_empty() {
                 for _ in cards.iter() {
                     try!(write!(out, "┏━━━━━━━┓ "));
@@ -184,7 +184,7 @@ impl State {
             }
             Ok(())
         }
-        fn print_player(out: &mut io::Write, player: &Player) -> io::Result<()> {
+        fn print_player(out: &mut dyn io::Write, player: &Player) -> io::Result<()> {
             if !player.reserved.is_empty() {
                 try!(write!(out, "Reserved\n"));
                 try!(print_cards(out, &player.reserved));
