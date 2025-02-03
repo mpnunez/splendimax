@@ -114,166 +114,166 @@ impl State {
     }
 
     pub fn print(&self, out: &mut dyn io::Write) -> io::Result<()> {
-        try!(write!(out, "Player: {}\n", self.adversary.score()));
+        write!(out, "Player: {}\n", self.adversary.score())?;
         fn print_cards(out: &mut dyn io::Write, cards: &Vec<Card>) -> io::Result<()> {
             if !cards.is_empty() {
                 for _ in cards.iter() {
-                    try!(write!(out, "┏━━━━━━━┓ "));
+                    write!(out, "┏━━━━━━━┓ ")?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
                 for card in cards.iter() {
-                    try!(write!(out, "┃{}     {}┃ ", card.color.code(), card.points));
+                    write!(out, "┃{}     {}┃ ", card.color.code(), card.points)?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
                 for _ in cards.iter() {
-                    try!(write!(out, "┃       ┃ "));
+                    write!(out, "┃       ┃ ")?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
                 for card in cards.iter() {
-                    try!(write!(out, "┃"));
+                    write!(out, "┃")?;
                     let mut count = 0;
                     for color in Color::all_except_joker() {
                         if card.cost[color] > 0 {
-                            try!(write!(out, "{}", color.code()));
+                            write!(out, "{}", color.code())?;
                             count += 1;
                             if count < 4 {
-                                try!(write!(out, " "));
+                                write!(out, " ")?;
                             }
                         }
                     }
                     if count < 4 {
-                        try!(write!(out, " "));
+                        write!(out, " ")?;
                         if count < 3 {
-                            try!(write!(out, "  "));
+                            write!(out, "  ")?;
                             if count < 2 {
-                                try!(write!(out, "  "));
+                                write!(out, "  ")?;
                             }
                         }
                     }
-                    try!(write!(out, "┃ "));
+                    write!(out, "┃ ")?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
                 for card in cards.iter() {
-                    try!(write!(out, "┃"));
+                    write!(out, "┃")?;
                     let mut count = 0;
                     for color in Color::all_except_joker() {
                         if card.cost[color] > 0 {
-                            try!(write!(out, "{}", card.cost[color]));
+                            write!(out, "{}", card.cost[color])?;
                             count += 1;
                             if count < 4 {
-                                try!(write!(out, " "));
+                                write!(out, " ")?;
                             }
                         }
                     }
                     if count < 4 {
-                        try!(write!(out, " "));
+                        write!(out, " ")?;
                         if count < 3 {
-                            try!(write!(out, "  "));
+                            write!(out, "  ")?;
                             if count < 2 {
-                                try!(write!(out, "  "));
+                                write!(out, "  ")?;
                             }
                         }
                     }
-                    try!(write!(out, "┃ "));
+                    write!(out, "┃ ")?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
                 for _ in cards.iter() {
-                    try!(write!(out, "┗━━━━━━━┛ "));
+                    write!(out, "┗━━━━━━━┛ ")?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
             }
             Ok(())
         }
         fn print_player(out: &mut dyn io::Write, player: &Player) -> io::Result<()> {
             if !player.reserved.is_empty() {
-                try!(write!(out, "Reserved\n"));
-                try!(print_cards(out, &player.reserved));
+                write!(out, "Reserved\n")?;
+                print_cards(out, &player.reserved)?;
             }
             for color in Color::all() {
-                try!(write!(out, "{}: {}", color.code(), player.tokens[color]));
+                write!(out, "{}: {}", color.code(), player.tokens[color])?;
                 let count = player
                     .cards
                     .iter()
                     .filter(|ref card| card.color == color)
                     .count();
                 if count > 0 {
-                    try!(write!(out, " + {}", count));
+                    write!(out, " + {}", count)?;
                 }
-                try!(write!(out, "\n"));
+                write!(out, "\n")?;
             }
             Ok(())
         }
-        try!(print_player(out, &self.adversary));
-        try!(write!(out, "\n"));
+        print_player(out, &self.adversary)?;
+        write!(out, "\n")?;
 
-        try!(write!(out, "Adversary: {}\n", self.player.score()));
-        try!(print_player(out, &self.player));
+        write!(out, "Adversary: {}\n", self.player.score())?;
+        print_player(out, &self.player)?;
 
-        try!(write!(out, "\nBank\n"));
+        write!(out, "\nBank\n")?;
         for color in Color::all() {
-            try!(write!(out, "{} ", color.code()));
+            write!(out, "{} ", color.code())?;
         }
-        try!(write!(out, "\n"));
+        write!(out, "\n")?;
         for color in Color::all() {
-            try!(write!(out, "{} ", self.bank[color]));
+            write!(out, "{} ", self.bank[color])?;
         }
-        try!(write!(out, "\n\n"));
+        write!(out, "\n\n")?;
 
         if !self.nobles.is_empty() {
-            try!(write!(out, "\nNobles\n"));
+            write!(out, "\nNobles\n")?;
             for _ in self.nobles.iter() {
-                try!(write!(out, "┏━━━━━┓ "));
+                write!(out, "┏━━━━━┓ ")?;
             }
-            try!(write!(out, "\n"));
+            write!(out, "\n")?;
             for noble in self.nobles.iter() {
                 write!(out, "┃  {}  ┃ ", noble.points)?;
             }
             write!(out, "\n")?;
             for noble in self.nobles.iter() {
-                try!(write!(out, "┃"));
+                write!(out, "┃")?;
                 let mut count = 0;
                 for color in Color::all_except_joker() {
                     if noble.cost[color] > 0 {
-                        try!(write!(out, "{}", color.code()));
+                        write!(out, "{}", color.code())?;
                         count += 1;
                         if count < 3 {
-                            try!(write!(out, " "));
+                            write!(out, " ")?;
                         }
                     }
                 }
                 if count < 3 {
-                    try!(write!(out, " "));
+                    write!(out, " ")?;
                 }
-                try!(write!(out, "┃ "));
+                write!(out, "┃ ")?;
             }
-            try!(write!(out, "\n"));
+            write!(out, "\n")?;
             for noble in self.nobles.iter() {
-                try!(write!(out, "┃"));
+                write!(out, "┃")?;
                 let mut count = 0;
                 for color in Color::all_except_joker() {
                     if noble.cost[color] > 0 {
-                        try!(write!(out, "{}", noble.cost[color]));
+                        write!(out, "{}", noble.cost[color])?;
                         count += 1;
                         if count < 3 {
-                            try!(write!(out, " "));
+                            write!(out, " ")?;
                         }
                     }
                 }
                 if count < 3 {
-                    try!(write!(out, " "));
+                    write!(out, " ")?;
                 }
-                try!(write!(out, "┃ "));
+                write!(out, "┃ ")?;
             }
-            try!(write!(out, "\n"));
+            write!(out, "\n")?;
             for _ in self.nobles.iter() {
-                try!(write!(out, "┗━━━━━┛ "));
+                write!(out, "┗━━━━━┛ ")?;
             }
-            try!(write!(out, "\n"));
+            write!(out, "\n")?;
         }
-        try!(write!(out, "\n"));
-        try!(print_cards(out, &self.cards3));
-        try!(print_cards(out, &self.cards2));
-        try!(print_cards(out, &self.cards1));
+        write!(out, "\n")?;
+        print_cards(out, &self.cards3)?;
+        print_cards(out, &self.cards2)?;
+        print_cards(out, &self.cards1)?;
         Ok(())
     }
 }
