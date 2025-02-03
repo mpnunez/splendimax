@@ -47,7 +47,7 @@ fn main() {
     let mut round = 0;
     loop {
         if state.is_terminal() {
-            state.print(&mut stdout);
+            state.print(&mut stdout).unwrap();
             println!("round: {}", round);
             break;
         }
@@ -65,7 +65,7 @@ fn main() {
             // println!("{:?}", mov);
             state.apply(&mov);
         } else {
-            state.print(&mut stdout);
+            state.print(&mut stdout).unwrap();
             panic!("No moves");
         }
 

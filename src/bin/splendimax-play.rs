@@ -14,10 +14,10 @@ fn main() {
     let mut state = State::new(2);
     let mut rng = thread_rng();
     let mut round = 0;
-    state.print(&mut stdout);
+    state.print(&mut stdout).unwrap();
     loop {
         if state.is_terminal() {
-            state.print(&mut stdout);
+            state.print(&mut stdout).unwrap();
             break;
         }
 
@@ -27,12 +27,12 @@ fn main() {
                 println!("{:?}", mov);
                 state.apply(&mov);
             } else {
-                state.print(&mut stdout);
+                state.print(&mut stdout).unwrap();
                 panic!("No moves");
             }
             round += 1;
         } else {
-            state.print(&mut stdout);
+            state.print(&mut stdout).unwrap();
             'outer: loop {
                 let mut buf = String::new();
                 println!("Please specify action. (t)ake rkw, (b)uy 1 3 (row column), (r)eserve 1 3 (row column) b(u)y reserved 1 (index), (p)ass");
