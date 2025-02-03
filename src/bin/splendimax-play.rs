@@ -3,17 +3,14 @@ extern crate splendimax;
 
 use rand::{thread_rng, Rng};
 use splendimax::algo::alphabeta;
-use splendimax::algo::state::Score;
 use splendimax::algo::state::State as AlgoState;
-use splendimax::card::Card;
-use splendimax::color::Color;
 use splendimax::cost::Tokens;
 use splendimax::state::{Deck, Move, State};
 use std::io;
 
 fn main() {
     let mut stdout = io::stdout();
-    let mut stdin = io::stdin();
+    let stdin = io::stdin();
     let mut state = State::new(2);
     let mut rng = thread_rng();
     let mut round = 0;
