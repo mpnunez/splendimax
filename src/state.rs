@@ -13,13 +13,6 @@ pub const MAXIMUM_RESERVED: usize = 3;
 pub const MAXIMUM_COINS: u8 = 10;
 pub const SCORE_TO_WIN: u8 = 15;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Deck {
-    One,
-    Two,
-    Three,
-}
-
 type CardIndex = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -30,13 +23,13 @@ pub enum Move {
     },
     Reserve {
         index: CardIndex,
-        deck: Deck,
+        deck: usize,
         drop: Tokens,
         joker: bool,
     },
     Buy {
         index: CardIndex,
-        deck: Deck,
+        deck: usize,
         cost: Tokens,
         noble: Option<CardIndex>,
     },
@@ -361,7 +354,7 @@ impl algo::State for State {
                     card.color,
                     |noble: Option<u8>| Move::Buy {
                         index: i as u8,
-                        deck: Deck::Three,
+                        deck: 3,
                         cost: cost,
                         noble: noble,
                     },
@@ -378,7 +371,7 @@ impl algo::State for State {
                     card.color,
                     |noble: Option<u8>| Move::Buy {
                         index: i as u8,
-                        deck: Deck::Two,
+                        deck: 2,
                         cost: cost,
                         noble: noble,
                     },
@@ -395,7 +388,7 @@ impl algo::State for State {
                     card.color,
                     |noble: Option<u8>| Move::Buy {
                         index: i as u8,
-                        deck: Deck::One,
+                        deck: 1,
                         cost: cost,
                         noble: noble,
                     },
@@ -527,7 +520,7 @@ impl algo::State for State {
                 for drop in drop_possibilities.iter() {
                     moves.push(Move::Reserve {
                         index: i as u8,
-                        deck: Deck::One,
+                        deck: 1,
                         joker: joker,
                         drop: *drop,
                     });
@@ -538,7 +531,7 @@ impl algo::State for State {
                 for drop in drop_possibilities.iter() {
                     moves.push(Move::Reserve {
                         index: i as u8,
-                        deck: Deck::Two,
+                        deck: 2,
                         joker: joker,
                         drop: *drop,
                     });
@@ -549,7 +542,7 @@ impl algo::State for State {
                 for drop in drop_possibilities.iter() {
                     moves.push(Move::Reserve {
                         index: i as u8,
-                        deck: Deck::Three,
+                        deck: 3,
                         joker: joker,
                         drop: *drop,
                     });
@@ -584,9 +577,10 @@ impl algo::State for State {
                 drop,
             } => {
                 let cards = match deck {
-                    Deck::One => &mut self.cards1,
-                    Deck::Two => &mut self.cards2,
-                    Deck::Three => &mut self.cards3,
+                    1 => &mut self.cards1,
+                    2 => &mut self.cards2,
+                    3 => &mut self.cards3,
+                    _ => panic!("Invalid deck index"),
                 };
 
                 let player = if self.players_turn {
@@ -611,9 +605,10 @@ impl algo::State for State {
                 noble,
             } => {
                 let cards = match deck {
-                    Deck::One => &mut self.cards1,
-                    Deck::Two => &mut self.cards2,
-                    Deck::Three => &mut self.cards3,
+                    1 => &mut self.cards1,
+                    2 => &mut self.cards2,
+                    3 => &mut self.cards3,
+                    _ => panic!("Invalid deck index"),
                 };
 
                 let player = if self.players_turn {
@@ -691,9 +686,10 @@ impl algo::State for State {
                 }
 
                 let cards: &mut Vec<Card> = match deck {
-                    Deck::One => &mut self.cards1,
-                    Deck::Two => &mut self.cards2,
-                    Deck::Three => &mut self.cards3,
+                    1 => &mut self.cards1,
+                    2 => &mut self.cards2,
+                    3 => &mut self.cards3,
+                    _ => panic!("Invalid deck index"),
                 };
 
                 let card = player.reserved.pop().unwrap();
@@ -714,9 +710,10 @@ impl algo::State for State {
                 self.bank -= cost;
 
                 let cards = match deck {
-                    Deck::One => &mut self.cards1,
-                    Deck::Two => &mut self.cards2,
-                    Deck::Three => &mut self.cards3,
+                    1 => &mut self.cards1,
+                    2 => &mut self.cards2,
+                    3 => &mut self.cards3,
+                    _ => panic!("Invalid deck index"),
                 };
 
                 let card = player.cards.pop().unwrap();

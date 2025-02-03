@@ -5,7 +5,7 @@ use rand::{thread_rng, Rng};
 use splendimax::algo::alphabeta;
 use splendimax::algo::state::State as AlgoState;
 use splendimax::cost::Tokens;
-use splendimax::state::{Deck, Move, State};
+use splendimax::state::{Move, State};
 use std::io;
 
 fn main() {
@@ -66,17 +66,17 @@ fn main() {
                                     match c {
                                         Some('1') => {
                                             cards = &state.cards1;
-                                            deck = Deck::One;
+                                            deck = 1;
                                             break;
                                         }
                                         Some('2') => {
                                             cards = &state.cards2;
-                                            deck = Deck::Two;
+                                            deck = 2;
                                             break;
                                         }
                                         Some('3') => {
                                             cards = &state.cards3;
-                                            deck = Deck::Three;
+                                            deck = 3;
                                             break;
                                         }
                                         Some(_) => continue,
@@ -153,17 +153,17 @@ fn main() {
                                     match c {
                                         Some('1') => {
                                             cards = &state.cards1;
-                                            deck = Deck::One;
+                                            deck = 1;
                                             break;
                                         }
                                         Some('2') => {
                                             cards = &state.cards2;
-                                            deck = Deck::Two;
+                                            deck = 2;
                                             break;
                                         }
                                         Some('3') => {
                                             cards = &state.cards3;
-                                            deck = Deck::Three;
+                                            deck = 3;
                                             break;
                                         }
                                         Some(_) => continue,
