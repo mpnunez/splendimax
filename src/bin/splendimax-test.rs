@@ -69,21 +69,7 @@ fn main() {
             panic!("No moves");
         }
 
-        if state.cards1.len() < 4 {
-            if let Some(card) = state.deck1.pop() {
-                state.cards1.push(card);
-            }
-        }
-        if state.cards2.len() < 4 {
-            if let Some(card) = state.deck2.pop() {
-                state.cards2.push(card);
-            }
-        }
-        if state.cards3.len() < 4 {
-            if let Some(card) = state.deck3.pop() {
-                state.cards3.push(card);
-            }
-        }
+        state.refresh_available_cards();
         // sleep(Duration::from_secs(1));
     }
     //}

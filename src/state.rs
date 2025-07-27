@@ -43,14 +43,9 @@ pub enum Move {
 
 #[derive(PartialEq, Debug)]
 pub struct State {
-    pub deck1: Vec<Card>,
-    pub cards1: Vec<Card>,
 
-    pub deck2: Vec<Card>,
-    pub cards2: Vec<Card>,
-
-    pub deck3: Vec<Card>,
-    pub cards3: Vec<Card>,
+    pub decks: Vec<Vec<Card>>,
+    pub available_cards: Vec<Vec<Card>>,
 
     pub bank: Tokens,
     pub player: Player,
@@ -60,6 +55,8 @@ pub struct State {
 
     // true if player's turn, false if adversary's turn
     pub players_turn: bool,
+
+    pub cards_available_per_deck: usize,
 }
 
 pub type Score = i64;
@@ -71,38 +68,33 @@ impl State {
         }
         let mut rng = thread_rng();
 
-        let mut deck1 = read_cards_of_level("cards.csv",1);
-        rng.shuffle(&mut deck1);
-        let new_deck1_len = deck1.len() - 4;
-        let cards1 = deck1.drain(new_deck1_len..).collect();
+        let mut decks: Vec<Vec<Card>> = Vec::new();
+        let mut acs: Vec<Vec<Card>> = Vec::new();
 
-        let mut deck2 = read_cards_of_level("cards.csv",2);
-        rng.shuffle(&mut deck2);
-        let new_deck2_len = deck2.len() - 4;
-        let cards2 = deck2.drain(new_deck2_len..).collect();
+        for i in 0..3 {
+            let mut new_deck = read_cards_of_level("cards.csv",i+1);
+            rng.shuffle(&mut new_deck);
+            let new_deck_len = new_deck.len() - 4;
+            let new_available_cards = new_deck.drain(new_deck_len..).collect();
 
-        let mut deck3 = read_cards_of_level("cards.csv",3);
-        rng.shuffle(&mut deck3);
-        let new_deck3_len = deck3.len() - 4;
-        let cards3 = deck3.drain(new_deck3_len..).collect();
+            decks.push(new_deck);
+            acs.push(new_available_cards);
+        }
 
         let mut nobles = read_cards_of_level("cards.csv",0);
         rng.shuffle(&mut nobles);
         nobles.truncate(3);
 
         State {
-            deck1: deck1,
-            cards1: cards1,
-            deck2: deck2,
-            cards2: cards2,
-            deck3: deck3,
-            cards3: cards3,
+            decks: decks,
+            available_cards: acs,
 
             bank: Tokens::start(players),
             nobles: nobles,
             player: Player::new(),
             adversary: Player::new(),
             players_turn: true,
+            cards_available_per_deck: 4,
         }
     }
 
@@ -264,10 +256,20 @@ impl State {
             write!(out, "\n")?;
         }
         write!(out, "\n")?;
-        print_cards(out, &self.cards3)?;
-        print_cards(out, &self.cards2)?;
-        print_cards(out, &self.cards1)?;
+        for deck in <Vec<Vec<Card>> as Clone>::clone(&self.decks).into_iter().rev() {
+            print_cards(out, &deck)?;
+        }
         Ok(())
+    }
+
+    pub fn refresh_available_cards(&mut self) {
+        for i in 1..self.available_cards.len() {
+            if self.available_cards[i].len() < self.cards_available_per_deck {
+                if let Some(card) = self.decks[i].pop() {
+                    self.available_cards[i].push(card);
+                }
+            }
+        }
     }
 }
 
@@ -345,54 +347,22 @@ impl algo::State for State {
         }
 
         // Do most benificial moves first to get benefits of α β pruning
-        for (i, card) in self.cards3.iter().enumerate() {
-            if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(
-                    &mut tokens_from_cards,
-                    &self.nobles,
-                    &mut moves,
-                    card.color,
-                    |noble: Option<u8>| Move::Buy {
-                        index: i as u8,
-                        deck: 3,
-                        cost: cost,
-                        noble: noble,
-                    },
-                );
-            }
-        }
-
-        for (i, card) in self.cards2.iter().enumerate() {
-            if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(
-                    &mut tokens_from_cards,
-                    &self.nobles,
-                    &mut moves,
-                    card.color,
-                    |noble: Option<u8>| Move::Buy {
-                        index: i as u8,
-                        deck: 2,
-                        cost: cost,
-                        noble: noble,
-                    },
-                );
-            }
-        }
-
-        for (i, card) in self.cards1.iter().enumerate() {
-            if let Some(cost) = player.cost_for(card) {
-                push_card_with_nobles(
-                    &mut tokens_from_cards,
-                    &self.nobles,
-                    &mut moves,
-                    card.color,
-                    |noble: Option<u8>| Move::Buy {
-                        index: i as u8,
-                        deck: 1,
-                        cost: cost,
-                        noble: noble,
-                    },
-                );
+        for available_cards_for_deck in <Vec<Vec<Card>> as Clone>::clone(&self.available_cards).into_iter().rev() {
+            for (i, card) in available_cards_for_deck.iter().enumerate() {
+                if let Some(cost) = player.cost_for(card) {
+                    push_card_with_nobles(
+                        &mut tokens_from_cards,
+                        &self.nobles,
+                        &mut moves,
+                        card.color,
+                        |noble: Option<u8>| Move::Buy {
+                            index: i as u8,
+                            deck: 3,
+                            cost: cost,
+                            noble: noble,
+                        },
+                    );
+                }
             }
         }
 
@@ -516,38 +486,19 @@ impl algo::State for State {
                 &discard_options[0]
             };
 
-            for i in 0..self.cards1.len() {
-                for drop in drop_possibilities.iter() {
-                    moves.push(Move::Reserve {
-                        index: i as u8,
-                        deck: 1,
-                        joker: joker,
-                        drop: *drop,
-                    });
+            for cards in &self.available_cards {
+                for i in 0..cards.len() {
+                    for drop in drop_possibilities.iter() {
+                        moves.push(Move::Reserve {
+                            index: i as u8,
+                            deck: 1,
+                            joker: joker,
+                            drop: *drop,
+                        });
+                    }
                 }
             }
 
-            for i in 0..self.cards2.len() {
-                for drop in drop_possibilities.iter() {
-                    moves.push(Move::Reserve {
-                        index: i as u8,
-                        deck: 2,
-                        joker: joker,
-                        drop: *drop,
-                    });
-                }
-            }
-
-            for i in 0..self.cards3.len() {
-                for drop in drop_possibilities.iter() {
-                    moves.push(Move::Reserve {
-                        index: i as u8,
-                        deck: 3,
-                        joker: joker,
-                        drop: *drop,
-                    });
-                }
-            }
         }
 
         if moves.len() == 0 {
@@ -576,12 +527,7 @@ impl algo::State for State {
                 joker,
                 drop,
             } => {
-                let cards = match deck {
-                    1 => &mut self.cards1,
-                    2 => &mut self.cards2,
-                    3 => &mut self.cards3,
-                    _ => panic!("Invalid deck index"),
-                };
+                let cards = &mut self.available_cards[deck-1];
 
                 let player = if self.players_turn {
                     &mut self.player
@@ -604,12 +550,7 @@ impl algo::State for State {
                 cost,
                 noble,
             } => {
-                let cards = match deck {
-                    1 => &mut self.cards1,
-                    2 => &mut self.cards2,
-                    3 => &mut self.cards3,
-                    _ => panic!("Invalid deck index"),
-                };
+                let cards = &mut self.available_cards[deck-1];
 
                 let player = if self.players_turn {
                     &mut self.player
@@ -685,12 +626,7 @@ impl algo::State for State {
                     self.bank.joker += 1;
                 }
 
-                let cards: &mut Vec<Card> = match deck {
-                    1 => &mut self.cards1,
-                    2 => &mut self.cards2,
-                    3 => &mut self.cards3,
-                    _ => panic!("Invalid deck index"),
-                };
+                let cards = &mut self.available_cards[deck-1];
 
                 let card = player.reserved.pop().unwrap();
                 cards.insert(index as usize, card);
@@ -709,12 +645,7 @@ impl algo::State for State {
                 player.tokens += cost;
                 self.bank -= cost;
 
-                let cards = match deck {
-                    1 => &mut self.cards1,
-                    2 => &mut self.cards2,
-                    3 => &mut self.cards3,
-                    _ => panic!("Invalid deck index"),
-                };
+                let cards = &mut self.available_cards[deck-1];
 
                 let card = player.cards.pop().unwrap();
                 cards.insert(index as usize, card);

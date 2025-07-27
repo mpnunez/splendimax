@@ -63,19 +63,20 @@ fn main() {
                                 let deck;
                                 loop {
                                     let c = iter.next();
+                                    // TODO: Convert c as text to an int with error handling
                                     match c {
                                         Some('1') => {
-                                            cards = &state.cards1;
+                                            cards = &state.available_cards[0];
                                             deck = 1;
                                             break;
                                         }
                                         Some('2') => {
-                                            cards = &state.cards2;
+                                            cards = &state.available_cards[1];
                                             deck = 2;
                                             break;
                                         }
                                         Some('3') => {
-                                            cards = &state.cards3;
+                                            cards = &state.available_cards[2];
                                             deck = 3;
                                             break;
                                         }
@@ -152,17 +153,17 @@ fn main() {
                                     let c = iter.next();
                                     match c {
                                         Some('1') => {
-                                            cards = &state.cards1;
+                                            cards = &state.available_cards[0];
                                             deck = 1;
                                             break;
                                         }
                                         Some('2') => {
-                                            cards = &state.cards2;
+                                            cards = &state.available_cards[1];
                                             deck = 2;
                                             break;
                                         }
                                         Some('3') => {
-                                            cards = &state.cards3;
+                                            cards = &state.available_cards[2];
                                             deck = 3;
                                             break;
                                         }
@@ -291,21 +292,8 @@ fn main() {
             }
         }
 
-        if state.cards1.len() < 4 {
-            if let Some(card) = state.deck1.pop() {
-                state.cards1.push(card);
-            }
-        }
-        if state.cards2.len() < 4 {
-            if let Some(card) = state.deck2.pop() {
-                state.cards2.push(card);
-            }
-        }
-        if state.cards3.len() < 4 {
-            if let Some(card) = state.deck3.pop() {
-                state.cards3.push(card);
-            }
-        }
+        state.refresh_available_cards();
+
         println!("");
     }
     println!("round: {}", round);
