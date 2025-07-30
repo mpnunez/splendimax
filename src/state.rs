@@ -256,14 +256,14 @@ impl State {
             write!(out, "\n")?;
         }
         write!(out, "\n")?;
-        for deck in <Vec<Vec<Card>> as Clone>::clone(&self.decks).into_iter().rev() {
+        for deck in <Vec<Vec<Card>> as Clone>::clone(&self.available_cards).into_iter().rev() {
             print_cards(out, &deck)?;
         }
         Ok(())
     }
 
     pub fn refresh_available_cards(&mut self) {
-        for i in 1..self.available_cards.len() {
+        for i in 0..self.available_cards.len() {
             if self.available_cards[i].len() < self.cards_available_per_deck {
                 if let Some(card) = self.decks[i].pop() {
                     self.available_cards[i].push(card);
@@ -347,7 +347,8 @@ impl algo::State for State {
         }
 
         // Do most benificial moves first to get benefits of α β pruning
-        for available_cards_for_deck in <Vec<Vec<Card>> as Clone>::clone(&self.available_cards).into_iter().rev() {
+        for someting in 0..3 {
+            let available_cards_for_deck = &self.available_cards[2-someting];
             for (i, card) in available_cards_for_deck.iter().enumerate() {
                 if let Some(cost) = player.cost_for(card) {
                     push_card_with_nobles(
@@ -357,7 +358,7 @@ impl algo::State for State {
                         card.color,
                         |noble: Option<u8>| Move::Buy {
                             index: i as u8,
-                            deck: 3,
+                            deck: 2-someting,
                             cost: cost,
                             noble: noble,
                         },
@@ -486,12 +487,13 @@ impl algo::State for State {
                 &discard_options[0]
             };
 
-            for cards in &self.available_cards {
+            for deck_idx in 0..3 {
+                let cards = &self.available_cards[deck_idx];
                 for i in 0..cards.len() {
                     for drop in drop_possibilities.iter() {
                         moves.push(Move::Reserve {
                             index: i as u8,
-                            deck: 1,
+                            deck: deck_idx,
                             joker: joker,
                             drop: *drop,
                         });
@@ -527,7 +529,7 @@ impl algo::State for State {
                 joker,
                 drop,
             } => {
-                let cards = &mut self.available_cards[deck-1];
+                let cards = &mut self.available_cards[deck];
 
                 let player = if self.players_turn {
                     &mut self.player
@@ -550,7 +552,7 @@ impl algo::State for State {
                 cost,
                 noble,
             } => {
-                let cards = &mut self.available_cards[deck-1];
+                let cards = &mut self.available_cards[deck];
 
                 let player = if self.players_turn {
                     &mut self.player
@@ -626,7 +628,7 @@ impl algo::State for State {
                     self.bank.joker += 1;
                 }
 
-                let cards = &mut self.available_cards[deck-1];
+                let cards = &mut self.available_cards[deck];
 
                 let card = player.reserved.pop().unwrap();
                 cards.insert(index as usize, card);
@@ -645,7 +647,7 @@ impl algo::State for State {
                 player.tokens += cost;
                 self.bank -= cost;
 
-                let cards = &mut self.available_cards[deck-1];
+                let cards = &mut self.available_cards[deck];
 
                 let card = player.cards.pop().unwrap();
                 cards.insert(index as usize, card);
